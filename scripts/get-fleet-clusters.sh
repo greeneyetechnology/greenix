@@ -40,7 +40,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if ! [ -d $FLEET_PATH ]; then
-    echo "error: path not found $FLEET_PATH"
+    echo "error: path not found $FLEET_PATH."
 fi
 
 cluster_cmd="awk -F': ' '/CLUSTER|SPRAYER_GROUP|BOOM_LOCATION/ {split(\$2, arr, \"#\"); gsub(/[[:space:]]/, \"\", arr[1]); printf \"%s \", arr[1]} END {print \"\"}' {}"

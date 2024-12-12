@@ -51,7 +51,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if ! command -v "vault" 2>&1 >/dev/null; then
-    echo "error: vault not found."
+    echo "error: 'vault' command not found."
     echo "https://developer.hashicorp.com/vault/install"
     exit 1
 fi
@@ -66,7 +66,7 @@ if ! vault token lookup 2>&1 >/dev/null; then
 fi
 
 if ! date --version 2>&1 | grep -q "GNU coreutils"; then
-    echo "error: command 'date' version not supported."
+    echo "error: 'date' command version not supported."
     echo "make sure you use the GNU date from 'coreutils' library."
     exit 1
 fi
@@ -79,19 +79,19 @@ sign_certificate() {
 
 valid_certificate() {
     if [ ! "$CERT_PATH" ]; then
-        echo "error: couldn't find certificate."
+        echo "error: certificate not found."
         return 1
     fi
     expire_date_timestamp=$(date -d "$(ssh-keygen -L -f "$CERT_PATH" | awk '/Valid/ {print $5}')" "+%s")
     current_date_timestamp=$(date "+%s")
     if [ $current_date_timestamp -gt $expire_date_timestamp ]; then
-        echo "error: certificate expired"
+        echo "error: certificate expired."
         return 1
     fi
 }
 
 if ! [ -f "$KEY_PATH" ] || ! [ -f "$KEY_PATH.pub" ]; then
-    echo "couldn't find ssh key to generate certificate."
+    echo "cannot find ssh key to generate certificate."
     echo "attempting key generation..."
     if ! ssh-keygen -t ed25519 -f "$KEY_PATH"; then
         echo "error: failed to generate key."
@@ -102,18 +102,18 @@ fi
 
 if ! [ -f "$CERT_PATH" ]; then
     echo "couldn't find certificate."
-    echo "signing certificate"
+    echo "signing certificate..."
     sign_certificate
 fi
 
 if ! valid_certificate; then
     echo "certificate expired."
-    echo "resigning certificate"
+    echo "resigning certificate..."
     if ! sign_certificate; then
-        echo "error: failed to sign certificate"
+        echo "error: failed to sign certificate."
         exit 1
     fi
 else
     hours_left=$(( ($expire_date_timestamp - $current_date_timestamp) / 3600 ))
-    echo "certificate is valid for another $hours_left hours"
+    echo "certificate is valid for another $hours_left hours."
 fi

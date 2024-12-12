@@ -72,7 +72,7 @@ fi
 
 path_found=$(bash -c "$find_cmd")
 if [ -z "$path_found" ]; then
-    echo "error: could not find path for $PATTERN."
+    echo "error: no directories matched $PATTERN."
     exit 1
 fi
 
