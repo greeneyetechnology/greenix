@@ -5,14 +5,16 @@ set -euo pipefail
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 FLEET_PATH=$($SCRIPT_DIR/find-dir.sh --pattern "rt-versions")clusters
 CONFIGMAP_NAME="cluster-vars-cm.yaml"
+PATTERN="office"
 
 print_help() {
     cat << EOF
 Usage: $(basename "$0") [OPTIONS]
 
 Options:
-  -p, --pattern    Search pattern for filtering clusters (default: 'office')
-  -h, --help       Display this help message
+  -p, --pattern     Search pattern for filtering clusters (default: 'office')
+  -c, --configmap   Configmap file that holds the locations (default: 'cluster-vars-cm.yaml')
+  -h, --help        Display this help message
 EOF
     exit 0
 }
@@ -26,15 +28,16 @@ while [[ $# -gt 0 ]]; do
             PATTERN="$2"
             shift 2
             ;;
+        -c|--configmap)
+            CONFIGMAP_NAME="$2"
+            shift 2
+            ;;
         *)
             echo "Unknown option: $1"
             print_help
             ;;
     esac
 done
-
-PATTERN=${PATTERN:-"office"}
-
 
 if ! [ -d $FLEET_PATH ]; then
     echo "error: path not found $FLEET_PATH"
