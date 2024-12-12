@@ -97,8 +97,6 @@ if ! [ -f "$KEY_PATH" ] || ! [ -f "$KEY_PATH.pub" ]; then
         exit 1
     fi
     echo "key generated successfully at ${KEY_PATH}."
-else
-    echo "using key: $KEY_PATH"
 fi
 
 if ! [ -f "$CERT_PATH" ]; then
