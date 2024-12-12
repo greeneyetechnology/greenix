@@ -16,13 +16,13 @@ Options:
   -c, --configmap   Configmap file that holds the locations (default: 'cluster-vars-cm.yaml')
   -h, --help        Display this help message
 EOF
-    exit 0
 }
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         -h|--help)
             print_help
+            exit 0
             ;;
         -p|--pattern)
             PATTERN="$2"
@@ -32,9 +32,15 @@ while [[ $# -gt 0 ]]; do
             CONFIGMAP_NAME="$2"
             shift 2
             ;;
-        *)
+        -*)
             echo "Unknown option: $1"
             print_help
+            exit 1
+            ;;
+        *)
+            # Collect non-option arguments for the query
+            query+="$1 "
+            shift
             ;;
     esac
 done

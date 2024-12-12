@@ -18,7 +18,6 @@ Options:
 
 This script validates and manages SSH certificates using HashiCorp Vault.
 EOF
-    exit 0
 }
 
 while [[ $# -gt 0 ]]; do
@@ -37,10 +36,11 @@ while [[ $# -gt 0 ]]; do
             ;;
         -h|--help)
             print_help
+            exit 0
             ;;
         -*)
             echo "unknown option: $1" >&2
-            return 1
+            exit 1
             ;;
         *)
             # Collect non-option arguments for the query

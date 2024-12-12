@@ -16,13 +16,13 @@ Options:
     -d, --depth NUM         Maximum search depth (default: 5)
     -h, --help              Show this help message and exit
 EOF
-    exit 0
 }
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -h|--help)
             print_help
+            exit 0
             ;;
         -p|--pattern)
             PATTERN="$2"
@@ -39,6 +39,7 @@ while [[ $# -gt 0 ]]; do
         *)
             echo "Unknown option: $1"
             print_help
+            exit 1
             ;;
     esac
 done
