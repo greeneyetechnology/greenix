@@ -66,7 +66,8 @@ if ! vault token lookup 2>&1 >/dev/null; then
 fi
 
 if ! date --version 2>&1 | grep -q "GNU coreutils"; then
-    echo "error: GNU date is required"
+    echo "error: command 'date' version not supported."
+    echo "make sure you use the GNU date from 'coreutils' library."
     exit 1
 fi
 
