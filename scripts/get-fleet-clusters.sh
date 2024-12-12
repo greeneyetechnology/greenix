@@ -43,7 +43,7 @@ if ! [ -d $FLEET_PATH ]; then
     echo "error: path not found $FLEET_PATH"
 fi
 
-cluster_cmd="awk -F': ' '/CLUSTER|SPRAYER_GROUP|BOOM_LOCATION/ {split(\$2, arr, \"#\"); printf \"%s \", arr[1]} END {print \"\"}' {}"
+cluster_cmd="awk -F': ' '/CLUSTER|SPRAYER_GROUP|BOOM_LOCATION/ {split(\$2, arr, \"#\"); gsub(/[[:space:]]/, \"\", arr[1]); printf \"%s \", arr[1]} END {print \"\"}' {}"
 
 if command -v "fd" 2>&1 >/dev/null; then
     find_cmd="fd -t f $CONFIGMAP_NAME $FLEET_PATH --exec $cluster_cmd"

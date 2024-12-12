@@ -2,7 +2,7 @@
 set -euo pipefail
 
 
-export VAULT_ADDR="https://sod.tail6954.ts.net/"
+VAULT_ADDR="https://sod.tail6954.ts.net/"
 KEY_PATH="${HOME}/.ssh/greeneye_id_ed25519"
 CERT_PATH="${HOME}/.ssh/greeneye-cert.pub"
 
