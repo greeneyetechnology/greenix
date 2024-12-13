@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+IFS=$'\n'
+
+print_help() {
+    cat << EOF
+Usage: gkx [options] [pattern]
+
+A tool to quickly switch between kubeconfig contexts using tailscale
+
+Options:
+  -h, --help    Show this help message and exit
+
+Arguments:
+  pattern       Optional pattern to filter available contexts
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            print_help
+            exit 0
+            ;;
+        -*)
+            echo "Unknown option: $1"
+            print_help
+            exit 1
+            ;;
+        *)
+            # Collect non-option arguments for the query
+            query+="$1 "
+            shift
+            ;;
+    esac
+done
+
+PATTERN="${query:-}"
+
+selection=$(bash -c "$SCRIPT_DIR/../scripts/get-device-selection.sh --kubeconfig "$PATTERN"" | cut -d' ' -f1) || {
+    echo "error: failed to get device selection"
+    exit 1
+}
+
+ctx_cmd="tailscale configure kubeconfig $selection"
+bash -c "$ctx_cmd"
+
