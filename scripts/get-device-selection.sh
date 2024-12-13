@@ -14,9 +14,11 @@ If no pattern is provided, all devices will be listed.
 
 Options:
   -h, --help                        Show this help message and exit
+  -k, --kubeconfig                  Kubeconfig context mode
 
 Examples:
   ./get-device-selection.sh         List all devices
+  ./get-device-selection.sh -k      List all available contexts
   ./get-device-selection.sh lab     Search for devices containing 'lab'
 EOF
 }
