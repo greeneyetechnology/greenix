@@ -6,7 +6,26 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 IFS=$'\n'
 
 print_help() {
-    echo "help"
+    cat << 'EOF'
+Usage: gssh [OPTIONS] [PATTERN]
+
+SSH into a Greeneye device using Tailscale.
+
+Options:
+  -h, --help                    Show this help message and exit
+  --ignore-certificate          Skip certificate validation
+  -i, --identity-path PATH      Path to SSH identity file (default: ~/.ssh/greeneye_id_ed25519)
+  -u, --user USER               SSH user (default: yarok)
+  -e, --ssh-extra-args ARGS     Additional SSH arguments (default: -Y -A)
+
+Arguments:
+  PATTERN                       Optional pattern to filter device selection
+
+Examples:
+  gssh                          # Select from all available devices
+  gssh robot                    # Filter devices containing 'robot'
+  gssh -u admin robot           # Connect as 'admin' user to device containing 'robot'
+EOF
 }
 
 while [[ $# -gt 0 ]]; do
