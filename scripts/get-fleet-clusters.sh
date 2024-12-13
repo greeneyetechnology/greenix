@@ -58,7 +58,7 @@ else
 fi
 
 if command -v "rg" 2>&1 >/dev/null; then
-    bash -c "$find_cmd" | rg "$PATTERN"
+    bash -c "$find_cmd" | rg "$PATTERN" | awk '{print $3, $1, $2}' | sort
 else
-    bash -c "$find_cmd" | grep "$PATTERN"
+    bash -c "$find_cmd" | grep "$PATTERN" | awk '{print $3, $1, $2}' | sort
 fi

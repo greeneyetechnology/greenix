@@ -107,7 +107,7 @@ if ! [ -f "$CERT_PATH" ]; then
 fi
 
 if ! valid_certificate; then
-    echo "certificate expired."
+    echo "certificate expired $(( ($current_date_timestamp - $expire_date_timestamp) / 86400 )) days ago."
     echo "resigning certificate..."
     if ! sign_certificate; then
         echo "error: failed to sign certificate."
