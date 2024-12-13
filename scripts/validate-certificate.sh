@@ -4,7 +4,7 @@ set -euo pipefail
 
 VAULT_ADDR="https://sod.tail6954.ts.net/"
 KEY_PATH="${HOME}/.ssh/greeneye_id_ed25519"
-CERT_PATH="${HOME}/.ssh/greeneye-cert.pub"
+CERT_PATH="${HOME}/.ssh/greeneye_id_ed25519-cert.pub"
 
 print_help() {
     cat << EOF
@@ -24,15 +24,15 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         -k|--key-path)
             KEY_PATH="$2"
-            shift; shift
+            shift 2
             ;;
         -c|--certificate-path)
             CERT_PATH="$2"
-            shift; shift
+            shift 2
             ;;
         -v|--vault-address)
             export VAULT_ADDR="$2"
-            shift; shift
+            shift 2
             ;;
         -h|--help)
             print_help
