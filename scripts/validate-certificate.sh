@@ -2,7 +2,7 @@
 set -euo pipefail
 
 
-export VAULT_ADDR="https://sod.tail6954.ts.net/"
+VAULT_ADDR="https://sod.tail6954.ts.net/"
 KEY_PATH="${HOME}/.ssh/greeneye_id_ed25519"
 CERT_PATH="${HOME}/.ssh/greeneye_id_ed25519-cert.pub"
 
@@ -72,7 +72,7 @@ if ! date --version 2>&1 | grep -q "GNU coreutils"; then
 fi
 
 sign_certificate() {
-    if ! vault write -field=signed_key ssh-client-signer/sign/administrator-role public_key=@"$KEY_PATH.pub" valid_principals=administrator > "$CERT_PATH"; then
+    if ! vault write -address="$VAULT_ADDR" -field=signed_key ssh-client-signer/sign/administrator-role public_key=@"$KEY_PATH.pub" valid_principals=administrator > "$CERT_PATH"; then
         return 1
     fi
 }
