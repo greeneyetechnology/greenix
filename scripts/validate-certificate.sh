@@ -2,7 +2,7 @@
 set -euo pipefail
 
 
-VAULT_ADDR="https://sod.tail6954.ts.net/"
+VAULT_ADDRESS="https://sod.tail6954.ts.net/"
 KEY_PATH="${HOME}/.ssh/greeneye_id_ed25519"
 CERT_PATH="${HOME}/.ssh/greeneye_id_ed25519-cert.pub"
 
@@ -31,7 +31,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         -v|--vault-address)
-            export VAULT_ADDR="$2"
+            export VAULT_ADDRESS="$2"
             shift 2
             ;;
         -h|--help)
@@ -56,7 +56,7 @@ if ! command -v "vault" 2>&1 >/dev/null; then
     exit 1
 fi
 
-if ! vault token lookup 2>&1 >/dev/null; then
+if ! vault token lookup -address="$VAULT_ADDRESS" 2>&1 >/dev/null; then
     echo "not logged in to vault."
     echo "attempting login..."
     if ! vault login -method=oidc; then
@@ -72,7 +72,7 @@ if ! date --version 2>&1 | grep -q "GNU coreutils"; then
 fi
 
 sign_certificate() {
-    if ! vault write -address="$VAULT_ADDR" -field=signed_key ssh-client-signer/sign/administrator-role public_key=@"$KEY_PATH.pub" valid_principals=administrator > "$CERT_PATH"; then
+    if ! vault write -address="$VAULT_ADDRESS" -field=signed_key ssh-client-signer/sign/administrator-role public_key=@"$KEY_PATH.pub" valid_principals=administrator > "$CERT_PATH"; then
         return 1
     fi
 }
