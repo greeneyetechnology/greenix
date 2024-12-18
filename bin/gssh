@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 IFS=$'\n'
 CERT=true
 SSH_IDENTITY="$HOME/.ssh/greeneye_id_ed25519"
@@ -10,9 +9,8 @@ SSH_USER="yarok"
 SSH_ARGS="-Y -A"
 PATTERN=""
 
-
 print_help() {
-    cat << 'EOF'
+    cat <<'EOF'
 SSH into a Greeneye device using Tailscale.
 
 Usage: gssh [OPTIONS] [PATTERN]
@@ -37,40 +35,40 @@ EOF
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        -h|--help)
-            print_help
-            exit 0
-            ;;
-        --ignore-certificate)
-            CERT=false
-            shift
-            ;;
-        -i|--identity-path)
-            SSH_IDENTITY="$2"
-            shift 2
-            ;;
-        -u|--user)
-            SSH_USER="$2"
-            shift 2
-            ;;
-        -e|--ssh-extra-args)
-            SSH_ARGS="$2"
-            shift 2
-            ;;
-        --debug)
-            DEBUG=true
-            shift
-            ;;
-        -*)
-            echo "Unknown option: $1"
-            print_help
-            exit 1
-            ;;
-        *)
-            # Collect non-option arguments for the query
-            PATTERN="$PATTERN $1"
-            shift
-            ;;
+    -h | --help)
+        print_help
+        exit 0
+        ;;
+    --ignore-certificate)
+        CERT=false
+        shift
+        ;;
+    -i | --identity-path)
+        SSH_IDENTITY="$2"
+        shift 2
+        ;;
+    -u | --user)
+        SSH_USER="$2"
+        shift 2
+        ;;
+    -e | --ssh-extra-args)
+        SSH_ARGS="$2"
+        shift 2
+        ;;
+    --debug)
+        DEBUG=true
+        shift
+        ;;
+    -*)
+        echo "Unknown option: $1"
+        print_help
+        exit 1
+        ;;
+    *)
+        # Collect non-option arguments for the query
+        PATTERN="$PATTERN $1"
+        shift
+        ;;
     esac
 done
 

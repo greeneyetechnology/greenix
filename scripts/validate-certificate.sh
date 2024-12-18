@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-
 VAULT_ADDRESS="https://sod.tail6954.ts.net/"
 KEY_PATH="${HOME}/.ssh/greeneye_id_ed25519"
 CERT_PATH="${HOME}/.ssh/greeneye_id_ed25519-cert.pub"
 
 print_help() {
-    cat << EOF
+    cat <<EOF
 This script validates and manages SSH certificates using HashiCorp Vault.
 
 Usage: validate-certificate.sh [OPTIONS]
@@ -33,35 +32,35 @@ EOF
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        -k|--key-path)
-            KEY_PATH="$2"
-            shift 2
-            ;;
-        -c|--certificate-path)
-            CERT_PATH="$2"
-            shift 2
-            ;;
-        -v|--vault-address)
-            export VAULT_ADDRESS="$2"
-            shift 2
-            ;;
-        -h|--help)
-            print_help
-            exit 0
-            ;;
-        --debug)
-            DEBUG=true
-            shift
-            ;;
-        -*)
-            echo "unknown option: $1" >&2
-            exit 1
-            ;;
-        *)
-            # Collect non-option arguments for the query
-            query+="$1 "
-            shift
-            ;;
+    -k | --key-path)
+        KEY_PATH="$2"
+        shift 2
+        ;;
+    -c | --certificate-path)
+        CERT_PATH="$2"
+        shift 2
+        ;;
+    -v | --vault-address)
+        export VAULT_ADDRESS="$2"
+        shift 2
+        ;;
+    -h | --help)
+        print_help
+        exit 0
+        ;;
+    --debug)
+        DEBUG=true
+        shift
+        ;;
+    -*)
+        echo "unknown option: $1" >&2
+        exit 1
+        ;;
+    *)
+        # Collect non-option arguments for the query
+        query+="$1 "
+        shift
+        ;;
     esac
 done
 
@@ -69,13 +68,13 @@ if [ "${DEBUG:-false}" = "true" ]; then
     set -x
 fi
 
-if ! command -v "vault" > /dev/null 2>&1 ; then
+if ! command -v "vault" >/dev/null 2>&1; then
     echo "error: 'vault' command not found."
     echo "https://developer.hashicorp.com/vault/install"
     exit 1
 fi
 
-if ! vault token lookup -address="$VAULT_ADDRESS" > /dev/null 2>&1 ; then
+if ! vault token lookup -address="$VAULT_ADDRESS" >/dev/null 2>&1; then
     echo "not logged in to vault."
     echo "attempting login..."
     if ! vault login -method=oidc; then
@@ -91,7 +90,7 @@ if ! date --version 2>&1 | grep -q "GNU coreutils"; then
 fi
 
 sign_certificate() {
-    if ! vault write -address="$VAULT_ADDRESS" -field=signed_key ssh-client-signer/sign/administrator-role public_key=@"$KEY_PATH.pub" valid_principals=administrator > "$CERT_PATH"; then
+    if ! vault write -address="$VAULT_ADDRESS" -field=signed_key ssh-client-signer/sign/administrator-role public_key=@"$KEY_PATH.pub" valid_principals=administrator >"$CERT_PATH"; then
         return 1
     fi
 }
@@ -126,13 +125,13 @@ if ! [ -f "$CERT_PATH" ]; then
 fi
 
 if ! valid_certificate; then
-    echo "certificate expired $(( (current_date_timestamp - expire_date_timestamp) / 86400 )) days ago."
+    echo "certificate expired $(((current_date_timestamp - expire_date_timestamp) / 86400)) days ago."
     echo "resigning certificate..."
     if ! sign_certificate; then
         echo "error: failed to sign certificate."
         exit 1
     fi
 else
-    hours_left=$(( (expire_date_timestamp - current_date_timestamp) / 3600 ))
+    hours_left=$(((expire_date_timestamp - current_date_timestamp) / 3600))
     echo "certificate is valid for another $hours_left hours."
 fi

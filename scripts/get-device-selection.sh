@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 IFS=$'\n'
 PATTERN=""
 CONTEXT=""
 DEBUG=false
 
 print_help() {
-    cat << EOF
+    cat <<EOF
 Set kubeconfig for devices from fleet and tailscale.
 If no pattern is provided, all devices will be listed.
 
@@ -32,27 +31,27 @@ EOF
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        -h|--help)
-            print_help
-            exit 0
-            ;;
-        -k|--kubeconfig)
-            CONTEXT="--kubeconfig"
-            shift
-            ;;
-        --debug)
-            DEBUG=true
-            shift
-            ;;
-        -*)
-            echo "Unknown option: $1"
-            print_help
-            exit 1
-            ;;
-        *)
-            PATTERN="$PATTERN $1"
-            shift
-            ;;
+    -h | --help)
+        print_help
+        exit 0
+        ;;
+    -k | --kubeconfig)
+        CONTEXT="--kubeconfig"
+        shift
+        ;;
+    --debug)
+        DEBUG=true
+        shift
+        ;;
+    -*)
+        echo "Unknown option: $1"
+        print_help
+        exit 1
+        ;;
+    *)
+        PATTERN="$PATTERN $1"
+        shift
+        ;;
     esac
 done
 
@@ -71,7 +70,7 @@ else
     FZF_QUERY="--query \"$PATTERN\""
 fi
 
-if command -v "fzf" > /dev/null 2>&1 ; then
+if command -v "fzf" >/dev/null 2>&1; then
     select_cmd="fzf --select-1 --exit-0 --exact $FZF_QUERY"
 else
     read -rp "Search device: " device
@@ -79,18 +78,17 @@ else
 fi
 
 echo "$tailscale_devices" | while IFS= read -r tailscale_device; do
-    IFS=$' ' read -r name <<< "$tailscale_device"
+    IFS=$' ' read -r name <<<"$tailscale_device"
     found=false
     while IFS= read -r fleet_device; do
-        IFS=$' ' read -r group location mac <<< "$fleet_device"
+        IFS=$' ' read -r group location mac <<<"$fleet_device"
         if [[ "$name" == *"$mac"* ]]; then
             echo "$tailscale_device $group $location"
             found=true
             break
         fi
-    done <<< "$fleet_devices"
+    done <<<"$fleet_devices"
     if [[ "$found" == "false" ]]; then
         echo "$tailscale_device - -"
     fi
 done | bash -c "$select_cmd"
-

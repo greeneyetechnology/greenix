@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-
 PATTERN="rt-versions"
 BASE_DIR="$HOME"
 DEPTH=5
@@ -9,7 +8,7 @@ PATTERN=""
 DEBUG=false
 
 print_help() {
-    cat << EOF
+    cat <<EOF
 Find a directory path
 
 Usage: $(basename "$0") [OPTIONS] [DIR]
@@ -32,31 +31,31 @@ EOF
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        -h|--help)
-            print_help
-            exit 0
-            ;;
-        -b|--base-dir)
-            BASE_DIR="$2"
-            shift 2
-            ;;
-        -d|--depth)
-            DEPTH="$2"
-            shift 2
-            ;;
-        --debug)
-            DEBUG=true
-            shift
-            ;;
-        -*)
-            echo "Unknown option: $1"
-            print_help
-            exit 1
-            ;;
-        *)
-            PATTERN="$1"
-            shift
-            ;;
+    -h | --help)
+        print_help
+        exit 0
+        ;;
+    -b | --base-dir)
+        BASE_DIR="$2"
+        shift 2
+        ;;
+    -d | --depth)
+        DEPTH="$2"
+        shift 2
+        ;;
+    --debug)
+        DEBUG=true
+        shift
+        ;;
+    -*)
+        echo "Unknown option: $1"
+        print_help
+        exit 1
+        ;;
+    *)
+        PATTERN="$1"
+        shift
+        ;;
     esac
 done
 
@@ -65,7 +64,8 @@ if [ "${DEBUG:-false}" = "true" ]; then
 fi
 
 if [ -z "$PATTERN" ]; then
-    echo "error: no search pattern provided."; echo
+    echo "error: no search pattern provided."
+    echo
     print_help
     exit 1
 fi
@@ -91,7 +91,7 @@ excludes=(
     out
 )
 
-if command -v fd &> /dev/null; then
+if command -v fd &>/dev/null; then
     find_cmd="fd -1 -t d ${PATTERN} $(printf -- "--exclude %s " "${excludes[@]}") --max-depth $DEPTH $BASE_DIR"
 else
     find_cmd="find $BASE_DIR -maxdepth $DEPTH -type d -name \"*${PATTERN}*\" $(printf -- "-not -path '*/%s/*' " "${excludes[@]}") -print -quit"
