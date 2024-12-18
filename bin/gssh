@@ -57,6 +57,10 @@ while [[ $# -gt 0 ]]; do
             SSH_ARGS="$2"
             shift 2
             ;;
+        --debug)
+            DEBUG=true
+            shift
+            ;;
         -*)
             echo "Unknown option: $1"
             print_help
@@ -74,10 +78,6 @@ if [ "${DEBUG:-false}" = "true" ]; then
     set -x
 fi
 
-if [ -z "$PATTERN" ]; then
-    PATTERN="."
-fi
-
 PATTERN=$(echo "$PATTERN" | xargs)
 
 if $CERT; then
@@ -89,11 +89,12 @@ else
     echo "ignoring certificate..."
 fi
 
-selection=$(bash -c "$SCRIPT_DIR/../scripts/get-device-selection.sh $PATTERN" | cut -d' ' -f1) || {
-    echo "error: failed to get device selection"
+selection=$(bash -c "$SCRIPT_DIR/../scripts/get-device-selection.sh $PATTERN" | cut -d' ' -f1) || true
+
+if [ -z "$selection" ]; then
+    echo "error: empty selection."
     exit 1
-}
+fi
 
 ssh_cmd="ssh -i $SSH_IDENTITY $SSH_ARGS $SSH_USER@$selection"
 bash -c "$ssh_cmd"
-
