@@ -13,9 +13,9 @@ PATTERN=""
 
 print_help() {
     cat << 'EOF'
-Usage: gssh [OPTIONS] [PATTERN]
-
 SSH into a Greeneye device using Tailscale.
+
+Usage: gssh [OPTIONS] [PATTERN]
 
 Options:
     -h, --help                    Show this help message and exit
