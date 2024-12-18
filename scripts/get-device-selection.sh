@@ -4,22 +4,29 @@ set -euo pipefail
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 IFS=$'\n'
+PATTERN=""
+CONTEXT=""
+DEBUG=false
 
 print_help() {
     cat << EOF
-Usage: ${0} [options] [pattern]
-
 Set kubeconfig for devices from fleet and tailscale.
 If no pattern is provided, all devices will be listed.
 
+Usage: ${0} [OPTIONS] [PATTERN]
+
 Options:
-  -h, --help                        Show this help message and exit
-  -k, --kubeconfig                  Kubeconfig context mode
+    -h, --help                        Show this help message and exit
+    -k, --kubeconfig                  Kubeconfig context mode
+    --debug                           Run with debug information
 
 Examples:
-  ./get-device-selection.sh         List all devices
-  ./get-device-selection.sh -k      List all available contexts
-  ./get-device-selection.sh lab     Search for devices containing 'lab'
+    ./get-device-selection.sh         List all devices
+    ./get-device-selection.sh -k      List all available contexts
+    ./get-device-selection.sh lab     Search for devices containing 'lab'
+
+Arguments:
+    PATTERN       Optional pattern to filter output
 EOF
 }
 
@@ -30,7 +37,11 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         -k|--kubeconfig)
-            KUBECTX="--kubeconfig"
+            CONTEXT="--kubeconfig"
+            shift
+            ;;
+        --debug)
+            DEBUG=true
             shift
             ;;
         -*)
@@ -39,29 +50,36 @@ while [[ $# -gt 0 ]]; do
             exit 1
             ;;
         *)
-            # Collect non-option arguments for the query
-            query+="$1 "
+            PATTERN="$PATTERN $1"
             shift
             ;;
     esac
 done
 
-PATTERN="${query:-${@}}"
-if [ -z $PATTERN ]; then PATTERN="."; FZF_QUERY=""; else FZF_QUERY="--query $PATTERN"; fi
-KUBECTX=${KUBECTX:-""}
+if [ "${DEBUG:-false}" = "true" ]; then
+    set -x
+fi
 
-fleet_devices=$($SCRIPT_DIR/get-fleet-clusters.sh --pattern $PATTERN)
-tailscale_devices=$($SCRIPT_DIR/get-tailscale-devices.sh $KUBECTX)
+PATTERN=$(echo "$PATTERN" | xargs)
 
-if command -v "fzf" 2>&1 >/dev/null; then
-    select_cmd="fzf --select-1 --exit-0 --exact "$FZF_QUERY""
+fleet_devices=$("$SCRIPT_DIR"/get-fleet-clusters.sh "$PATTERN")
+tailscale_devices=$("$SCRIPT_DIR"/get-tailscale-devices.sh "$CONTEXT")
+
+if [ -z "$PATTERN" ]; then
+    FZF_QUERY=""
 else
-    read -p "Search device: " device
+    FZF_QUERY="--query \"$PATTERN\""
+fi
+
+if command -v "fzf" > /dev/null 2>&1 ; then
+    select_cmd="fzf --select-1 --exit-0 --exact $FZF_QUERY"
+else
+    read -rp "Search device: " device
     select_cmd="grep -i $device"
 fi
 
 echo "$tailscale_devices" | while IFS= read -r tailscale_device; do
-    IFS=$' ' read -r name status <<< "$tailscale_device"
+    IFS=$' ' read -r name <<< "$tailscale_device"
     found=false
     while IFS= read -r fleet_device; do
         IFS=$' ' read -r group location mac <<< "$fleet_device"

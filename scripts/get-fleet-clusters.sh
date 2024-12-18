@@ -3,18 +3,22 @@ set -euo pipefail
 
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-FLEET_PATH=$($SCRIPT_DIR/find-dir.sh --pattern "rt-versions")clusters
+FLEET_PATH=$("$SCRIPT_DIR"/find-dir.sh "rt-versions")/clusters
 CONFIGMAP_NAME="cluster-vars-cm.yaml"
-PATTERN="office"
+PATTERN=""
 
 print_help() {
     cat << EOF
-Usage: $(basename "$0") [OPTIONS]
+List the clusters available from fleet management
+
+Usage: $(basename "$0") [OPTIONS] [PATTERN]
 
 Options:
-  -p, --pattern     Search pattern for filtering clusters (default: 'office')
-  -c, --configmap   Configmap file that holds the locations (default: 'cluster-vars-cm.yaml')
-  -h, --help        Display this help message
+    -c, --configmap   Configmap file that holds the locations (default: 'cluster-vars-cm.yaml')
+    -h, --help        Display this help message
+    --debug           Run with debug information
+Arguments:
+    PATTERN       Optional pattern to filter available devices
 EOF
 }
 
@@ -24,13 +28,13 @@ while [[ $# -gt 0 ]]; do
             print_help
             exit 0
             ;;
-        -p|--pattern)
-            PATTERN="$2"
-            shift 2
-            ;;
         -c|--configmap)
             CONFIGMAP_NAME="$2"
             shift 2
+            ;;
+        --debug)
+            DEBUG=true
+            shift
             ;;
         -*)
             echo "Unknown option: $1"
@@ -38,27 +42,36 @@ while [[ $# -gt 0 ]]; do
             exit 1
             ;;
         *)
-            # Collect non-option arguments for the query
-            query+="$1 "
+            PATTERN="$PATTERN $1"
             shift
             ;;
     esac
 done
 
-if ! [ -d $FLEET_PATH ]; then
+if [ "${DEBUG:-false}" = "true" ]; then
+    set -x
+fi
+
+if [ -z "$PATTERN" ]; then
+    PATTERN="."
+fi
+
+if ! [ -d "$FLEET_PATH" ]; then
     echo "error: path not found $FLEET_PATH."
 fi
 
+PATTERN=$(echo "$PATTERN" | xargs)
+
 cluster_cmd="awk -F': ' '/CLUSTER|SPRAYER_GROUP|BOOM_LOCATION/ {split(\$2, arr, \"#\"); gsub(/[[:space:]]/, \"\", arr[1]); printf \"%s \", arr[1]} END {print \"\"}' {}"
 
-if command -v "fd" 2>&1 >/dev/null; then
+if command -v "fd" > /dev/null 2>&1; then
     find_cmd="fd -t f $CONFIGMAP_NAME $FLEET_PATH --exec $cluster_cmd"
 else
     find_cmd="find $FLEET_PATH -type f -name $CONFIGMAP_NAME -exec $cluster_cmd \;"
 fi
 
-if command -v "rg" 2>&1 >/dev/null; then
-    bash -c "$find_cmd" | rg "$PATTERN" | awk '{print $3, $1, $2}' | sort
+if command -v "rg" > /dev/null 2>&1; then
+    bash -c "$find_cmd" | awk '{print $3, $1, $2}' | rg "$PATTERN" | sort
 else
-    bash -c "$find_cmd" | grep "$PATTERN" | awk '{print $3, $1, $2}' | sort
+    bash -c "$find_cmd" | awk '{print $3, $1, $2}' | grep "$PATTERN" |  sort
 fi

@@ -4,6 +4,12 @@ set -euo pipefail
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 IFS=$'\n'
+CERT=true
+SSH_IDENTITY="$HOME/.ssh/greeneye_id_ed25519"
+SSH_USER="yarok"
+SSH_ARGS="-Y -A"
+PATTERN=""
+
 
 print_help() {
     cat << 'EOF'
@@ -12,19 +18,20 @@ Usage: gssh [OPTIONS] [PATTERN]
 SSH into a Greeneye device using Tailscale.
 
 Options:
-  -h, --help                    Show this help message and exit
-  --ignore-certificate          Skip certificate validation
-  -i, --identity-path PATH      Path to SSH identity file (default: ~/.ssh/greeneye_id_ed25519)
-  -u, --user USER               SSH user (default: yarok)
-  -e, --ssh-extra-args ARGS     Additional SSH arguments (default: -Y -A)
+    -h, --help                    Show this help message and exit
+    --ignore-certificate          Skip certificate validation
+    -i, --identity-path PATH      Path to SSH identity file (default: ~/.ssh/greeneye_id_ed25519)
+    -u, --user USER               SSH user (default: yarok)
+    -e, --ssh-extra-args ARGS     Additional SSH arguments (default: -Y -A)
+    --debug                       Run with debug information
 
 Arguments:
-  PATTERN                       Optional pattern to filter device selection
+    PATTERN                       Optional pattern to filter device selection
 
 Examples:
-  gssh                          # Select from all available devices
-  gssh robot                    # Filter devices containing 'robot'
-  gssh -u admin robot           # Connect as 'admin' user to device containing 'robot'
+    gssh                          # Select from all available devices
+    gssh robot                    # Filter devices containing 'robot'
+    gssh -u admin robot           # Connect as 'admin' user to device containing 'robot'
 EOF
 }
 
@@ -57,17 +64,21 @@ while [[ $# -gt 0 ]]; do
             ;;
         *)
             # Collect non-option arguments for the query
-            query+="$1 "
+            PATTERN="$PATTERN $1"
             shift
             ;;
     esac
 done
 
-CERT=${CERT:-true}
-SSH_IDENTITY=${SSH_IDENTITY:-"$HOME/.ssh/greeneye_id_ed25519"}
-SSH_USER=${SSH_USER:-"yarok"}
-SSH_ARGS=${SSH_ARGS:-"-Y -A"}
-PATTERN="${query:-}"
+if [ "${DEBUG:-false}" = "true" ]; then
+    set -x
+fi
+
+if [ -z "$PATTERN" ]; then
+    PATTERN="."
+fi
+
+PATTERN=$(echo "$PATTERN" | xargs)
 
 if $CERT; then
     if ! bash -c "$SCRIPT_DIR/../scripts/validate-certificate.sh --key-path $SSH_IDENTITY"; then
@@ -78,7 +89,7 @@ else
     echo "ignoring certificate..."
 fi
 
-selection=$(bash -c "$SCRIPT_DIR/../scripts/get-device-selection.sh "$PATTERN"" | cut -d' ' -f1) || {
+selection=$(bash -c "$SCRIPT_DIR/../scripts/get-device-selection.sh $PATTERN" | cut -d' ' -f1) || {
     echo "error: failed to get device selection"
     exit 1
 }

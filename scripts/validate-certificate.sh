@@ -8,15 +8,26 @@ CERT_PATH="${HOME}/.ssh/greeneye_id_ed25519-cert.pub"
 
 print_help() {
     cat << EOF
-Usage: validate-certificate.sh [options]
+This script validates and manages SSH certificates using HashiCorp Vault.
+
+Usage: validate-certificate.sh [OPTIONS]
 
 Options:
     -k, --key-path <path>           Path to SSH private key (default: ~/.ssh/greeneye_id_ed25519)
     -c, --certificate-path <path>   Path to SSH certificate (default: ~/.ssh/greeneye-cert.pub)
     -v, --vault-address <url>       Vault server address (default: https://sod.tail6954.ts.net/)
     -h, --help                      Show this help message
+    --debug                         run with debug information
 
-This script validates and manages SSH certificates using HashiCorp Vault.
+Examples:
+    # Use default settings
+    validate-certificate.sh
+
+    # Specify custom key and certificate paths
+    validate-certificate.sh -k ~/.ssh/custom_key -c ~/.ssh/custom_cert.pub
+
+    # Use a different Vault server and debug information
+    validate-certificate.sh --debug -v https://vault.example.com
 EOF
 }
 
@@ -38,6 +49,10 @@ while [[ $# -gt 0 ]]; do
             print_help
             exit 0
             ;;
+        --debug)
+            DEBUG=true
+            shift
+            ;;
         -*)
             echo "unknown option: $1" >&2
             exit 1
@@ -50,13 +65,17 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if ! command -v "vault" 2>&1 >/dev/null; then
+if [ "${DEBUG:-false}" = "true" ]; then
+    set -x
+fi
+
+if ! command -v "vault" > /dev/null 2>&1 ; then
     echo "error: 'vault' command not found."
     echo "https://developer.hashicorp.com/vault/install"
     exit 1
 fi
 
-if ! vault token lookup -address="$VAULT_ADDRESS" 2>&1 >/dev/null; then
+if ! vault token lookup -address="$VAULT_ADDRESS" > /dev/null 2>&1 ; then
     echo "not logged in to vault."
     echo "attempting login..."
     if ! vault login -method=oidc; then
@@ -84,7 +103,7 @@ valid_certificate() {
     fi
     expire_date_timestamp=$(date -d "$(ssh-keygen -L -f "$CERT_PATH" | awk '/Valid/ {print $5}')" "+%s")
     current_date_timestamp=$(date "+%s")
-    if [ $current_date_timestamp -gt $expire_date_timestamp ]; then
+    if [ "$current_date_timestamp" -gt "$expire_date_timestamp" ]; then
         echo "error: certificate expired."
         return 1
     fi
@@ -107,13 +126,13 @@ if ! [ -f "$CERT_PATH" ]; then
 fi
 
 if ! valid_certificate; then
-    echo "certificate expired $(( ($current_date_timestamp - $expire_date_timestamp) / 86400 )) days ago."
+    echo "certificate expired $(( (current_date_timestamp - expire_date_timestamp) / 86400 )) days ago."
     echo "resigning certificate..."
     if ! sign_certificate; then
         echo "error: failed to sign certificate."
         exit 1
     fi
 else
-    hours_left=$(( ($expire_date_timestamp - $current_date_timestamp) / 3600 ))
+    hours_left=$(( (expire_date_timestamp - current_date_timestamp) / 3600 ))
     echo "certificate is valid for another $hours_left hours."
 fi

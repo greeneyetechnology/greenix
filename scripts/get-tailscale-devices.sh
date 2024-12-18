@@ -1,27 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-IFS=$'\n'
-KUBECONFIG=false
 
-if ! command -v "tailscale" 2>&1 >/dev/null; then
-    echo "error: 'tailscale' command not found."
-    echo "https://tailscale.com/download"
-    exit 1
-fi
+IFS=$'\n'
+K3S=false
 
 print_help() {
     cat << "EOF"
-Usage: get-tailscale-devices.sh [options]
-
 List Tailscale devices.
 
-Options:
-  -h, --help       Show this help message and exit
-  -k, --kubeconfig Filter for kubeconfig compatible entries
+Usage: get-tailscale-devices.sh [OPTIONS]
 
-For more information, visit: https://tailscale.com/
+Options:
+    -h, --help    Show this help message and exit
+    -k, --k3s     Filter for k3s tagged entries
+    --debug       run with debug information
 EOF
 }
 
@@ -32,7 +25,11 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         -k|--kubeconfig)
-            KUBECONFIG=true
+            K3S=true
+            shift
+            ;;
+        --debug)
+            DEBUG=true
             shift
             ;;
         -*)
@@ -48,7 +45,17 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if $KUBECONFIG; then
+if [ "${DEBUG:-false}" = "true" ]; then
+    set -x
+fi
+
+if ! command -v "tailscale" > /dev/null 2>&1;  then
+    echo "error: 'tailscale' command not found."
+    echo "https://tailscale.com/download"
+    exit 1
+fi
+
+if $K3S; then
     tailscale status | awk '/tagged-devices/ {if($2 !~ /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/) print $2, $NF}'
 else
     tailscale status | awk '/tagged-devices/ {if($2 ~ /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/) print $2, $NF}'
