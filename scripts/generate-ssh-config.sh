@@ -19,7 +19,7 @@ Options:
 EOF
 }
 
-SSH_CONFIG_PATH="$HOME/.ssh/greeneeye_config"
+SSH_CONFIG_PATH="$HOME/.ssh/greeneye_config"
 SSH_IDENTITY_FILE="$HOME/.ssh/greeneye_id_ed_25519"
 SSH_USER="yarok"
 
