@@ -20,7 +20,7 @@ EOF
 }
 
 SSH_CONFIG_PATH="$HOME/.ssh/greeneye_config"
-SSH_IDENTITY_FILE="$HOME/.ssh/greeneye_id_ed_25519"
+SSH_IDENTITY_FILE="$HOME/.ssh/greeneye_id_ed25519"
 SSH_USER="yarok"
 
 while [[ $# -gt 0 ]]; do
