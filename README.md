@@ -69,6 +69,13 @@ Arguments:
   pattern       Optional pattern to filter available contexts
 ```
 
+## Troubleshoot - MacOS
+- **Case 1**:<br><br>
+  `error: 'tailscale' command not found.`<br><br>
+  **Solution** - Could be that `tailscale` is defined as alias.<br>
+  Type `which tailscale` to verify. then add the full path of `tailscale` to your PATH in `.zshrc`. <br>
+  For example add `export PATH="/Applications/Tailscale.app/Contents/MacOS:$PATH"`, then run `source .zshrc` and try using `gssh` \ `gkx` again.
+
 ## Nix
 This repository is designed to be used as a flake input:
 
