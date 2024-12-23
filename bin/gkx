@@ -12,11 +12,12 @@ A tool to quickly switch between kubeconfig contexts using tailscale
 Usage: gkx [OPTIONS] [PATTERN]
 
 Options:
-    -h, --help    Show this help message and exit
-    --debug       run with debug information
+    -h, --help      Show this help message and exit
+    --update        Update fleet repository (default: 'rt-versions')
+    --debug         run with debug information
 
 Arguments:
-    PATTERN       Optional pattern to filter output
+    PATTERN         Optional pattern to filter output
 EOF
 }
 
@@ -24,6 +25,10 @@ while [[ $# -gt 0 ]]; do
     case $1 in
     -h | --help)
         print_help
+        exit 0
+        ;;
+    --update)
+        "$SCRIPT_DIR"/../scripts/get-fleet-clusters.sh --update
         exit 0
         ;;
     --debug)

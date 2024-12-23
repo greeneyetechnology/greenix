@@ -16,20 +16,21 @@ SSH into a Greeneye device using Tailscale.
 Usage: gssh [OPTIONS] [PATTERN]
 
 Options:
-    -h, --help                    Show this help message and exit
-    --ignore-certificate          Skip certificate validation
-    -i, --identity-path PATH      Path to SSH identity file (default: ~/.ssh/greeneye_id_ed25519)
-    -u, --user USER               SSH user (default: yarok)
-    -e, --ssh-extra-args ARGS     Additional SSH arguments (default: -Y -A)
-    --debug                       Run with debug information
+    -h, --help                      Show this help message and exit
+    --ignore-certificate            Skip certificate validation
+    -i, --identity-path PATH        Path to SSH identity file (default: ~/.ssh/greeneye_id_ed25519)
+    -u, --user USER                 SSH user (default: yarok)
+    -e, --ssh-extra-args ARGS       Additional SSH arguments (default: -Y -A)
+    --update                        Update fleet repository (default: 'rt-versions')
+    --debug                         Run with debug information
 
 Arguments:
-    PATTERN                       Optional pattern to filter device selection
+    PATTERN                         Optional pattern to filter device selection
 
 Examples:
-    gssh                          # Select from all available devices
-    gssh robot                    # Filter devices containing 'robot'
-    gssh -u admin robot           # Connect as 'admin' user to device containing 'robot'
+    gssh                            # Select from all available devices
+    gssh robot                      # Filter devices containing 'robot'
+    gssh -u admin robot             # Connect as 'admin' user to device containing 'robot'
 EOF
 }
 
@@ -54,6 +55,10 @@ while [[ $# -gt 0 ]]; do
     -e | --ssh-extra-args)
         SSH_ARGS="$2"
         shift 2
+        ;;
+    --update)
+        "$SCRIPT_DIR"/../scripts/get-fleet-clusters.sh --update
+        exit 0
         ;;
     --debug)
         DEBUG=true
