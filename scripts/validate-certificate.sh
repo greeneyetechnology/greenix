@@ -13,7 +13,7 @@ Usage: validate-certificate.sh [OPTIONS]
 
 Options:
     -k, --key-path <path>           Path to SSH private key (default: ~/.ssh/greeneye_id_ed25519)
-    -c, --certificate-path <path>   Path to SSH certificate (default: ~/.ssh/greeneye-cert.pub)
+    -c, --certificate-path <path>   Path to SSH certificate (default: ~/.ssh/greeneye_id_ed25519-cert.pub)
     -v, --vault-address <url>       Vault server address (default: https://sod.tail6954.ts.net/)
     -h, --help                      Show this help message
     --debug                         run with debug information

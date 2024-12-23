@@ -21,6 +21,7 @@ EOF
 
 SSH_CONFIG_PATH="$HOME/.ssh/greeneye_config"
 SSH_IDENTITY_FILE="$HOME/.ssh/greeneye_id_ed25519"
+SSH_CERTIFICATE_FILE="$HOME/.ssh/greeneye_id_ed25519-cert.pub"
 SSH_USER="yarok"
 
 while [[ $# -gt 0 ]]; do
@@ -74,5 +75,6 @@ Host $host
     User $SSH_USER
     HostName $mac
     IdentityFile $SSH_IDENTITY_FILE
+    CertificateFile $SSH_CERTIFICATE_FILE
 EOF
 done <<<"$fleet_devices" >"$SSH_CONFIG_PATH"
