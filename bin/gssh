@@ -17,11 +17,11 @@ Usage: gssh [OPTIONS] [PATTERN]
 
 Options:
     -h, --help                      Show this help message and exit
-    --ignore-certificate            Skip certificate validation
     -i, --identity-path PATH        Path to SSH identity file (default: ~/.ssh/greeneye_id_ed25519)
     -u, --user USER                 SSH user (default: yarok)
     -e, --ssh-extra-args ARGS       Additional SSH arguments (default: -Y -A)
     --update                        Update fleet repository (default: 'rt-versions')
+    --ignore-certificate            Skip certificate validation
     --debug                         Run with debug information
 
 Arguments:
