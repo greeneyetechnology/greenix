@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-FLEET_PATH=$("$SCRIPT_DIR"/find-dir.sh "rt-versions")
+FLEET_PATH=$("$SCRIPT_DIR"/find-dir.sh "rt-versions$")
 CLUSTERS_PATH="$FLEET_PATH/clusters"
 CONFIGMAP_NAME="cluster-vars-cm.yaml"
 UPDATE_REPO=false
@@ -36,7 +36,7 @@ while [[ $# -gt 0 ]]; do
         shift 2
         ;;
     -f | --fleet-path)
-        FLEET_PATH=$("$SCRIPT_DIR"/find-dir.sh "$FLEET_PATH")
+        FLEET_PATH=$("$SCRIPT_DIR"/find-dir.sh "$FLEET_PATH$")
         shift 2
         ;;
     -u | --update)
