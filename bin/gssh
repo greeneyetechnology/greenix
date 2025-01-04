@@ -57,6 +57,7 @@ while [[ $# -gt 0 ]]; do
         shift 2
         ;;
     --update)
+        "$SCRIPT_DIR/../scripts/generate-ssh-config.sh" && echo "SSH config generated successfully."
         "$SCRIPT_DIR"/../scripts/get-fleet-clusters.sh --update
         exit 0
         ;;
