@@ -248,3 +248,41 @@ But remember, the way Nix works is inherently different.
 > Nix is looking at software packaging as programming
 > with traditional packages, you write some code, compile it and gets an output you can run
 > nix follows the same route, you write your configurtation as code, build it and get an output you can run.
+
+---
+
+# Getting started
+
+You can get started pretty easily with nix on any Linux / MacOS machine.
+
+I recommend using Determinate System's Nix Installer, this will install Nix (the package manager) with a feature called "flakes" enabled by default.
+
+```nix
+curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | \
+  sh -s -- install
+```
+
+Determinate System also include a nice Uninstaller in case you need it.
+
+---
+
+# Runing packages
+
+As we seen before, if we just want a temporary shell:
+
+```nix
+nix shell nixpkgs#<package-name>
+```
+
+We can also append a command to just run it:
+```nix
+nix shell nixpkgs#cmatrix --command cmatrix
+```
+
+---
+
+# Home Manager
+
+Home manager is a nix package, it helps you manage your user's home directory.
+
+
