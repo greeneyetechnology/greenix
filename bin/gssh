@@ -21,6 +21,7 @@ Options:
     -u, --user USER                 SSH user (default: yarok)
     -e, --ssh-extra-args ARGS       Additional SSH arguments (default: -Y -A)
     --update                        Update fleet repository (default: 'rt-versions')
+                                    and Greeneye's SSH config file (default: '~/.ssh/greeneye_config')
     --ignore-certificate            Skip certificate validation
     --debug                         Run with debug information
 
