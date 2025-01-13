@@ -77,7 +77,7 @@ fi
 if ! vault token lookup -address="$VAULT_ADDRESS" >/dev/null 2>&1; then
     echo "not logged in to vault."
     echo "attempting login..."
-    if ! vault login -method=oidc; then
+    if ! vault login -address="$VAULT_ADDRESS" -method=oidc; then
         echo "error: login failed."
         exit 1
     fi
