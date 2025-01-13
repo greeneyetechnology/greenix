@@ -18,6 +18,7 @@ Optional:
 - [fzf](https://github.com/junegunn/fzf) - Fuzzy finder
 - [fd](https://github.com/sharkdp/fd) - faster, parallelized find alternative
 - [ripgrep](https://github.com/BurntSushi/ripgrep) - multithreaded grep
+- [tmux](https://github.com/tmux/tmux/wiki) - terminal miultiplexer
 
 ## Installation
 Clone the repository:
@@ -85,15 +86,15 @@ This repository is designed to be used as a flake input:
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
     home-manager.url = "github:nix-community/home-manager/release-24.11";
-    greenix.url = "github:greeneyetechnology/greenix";
-    greenix.flake = false;
+    greenix.url = "github:greeneyetechnology/greenix"; # Our input source (this repository)
+    greenix.flake = false; # There is no flake
   };
   outputs = { nixpkgs, greenix, ... }: {
     homeConfigurations = {
       "username@hostname" = nixpkgs.lib.homeManagerConfiguration {
         pkgs = nixpkgs.legacyPackages.x86_64-linux;
         modules = [
-          ./greeneye.nix
+          ./greeneye.nix # Load the greeneye.nix module to your home-manager configuration
         ];
         extraSpecialArgs = {
           inherit greenix;
@@ -108,6 +109,7 @@ And the `greeneye.nix` module for the requirements:
 # greeneye.nix
 { pkgs, greenix, ... }:
 {
+  # Dependencies
   home.packages = with pkgs; [
     fd
     ripgrep
@@ -118,16 +120,20 @@ And the `greeneye.nix` module for the requirements:
     fzf
     coreutils
     vault
+    tmux
   ];
   home.file = {
+    # Copy the files into ~/.local/bin/greeneye
     ".local/bin/greeneye" = {
       source = "${greenix}";
       recursive = true;
     };
   };
   home.sessionPath = [
-    "${greenix}/bin"
+    # Add files to PATH
+    "${config.home.homeDirectory}/.local/bin/greeneye/bin"
+    "${config.home.homeDirectory}/.local/bin/greeneye/scripts"
   ];
 }
 ```
-This will add the `bin` directory to your PATH, if it doesn't register the commands, log out and back in from your account.
+This will add the `bin` and `scripts` directories to your PATH, if it doesn't register the commands, log out and back in from your account.
