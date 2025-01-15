@@ -5,14 +5,10 @@ A repository for greeneye utilities configuration, doubles as a flake input.
 General requirements, some are optional but recommended.
 > NOTE: for `nix` users see the [nix section](#nix)
 - [coreutils](https://formulae.brew.sh/formula/coreutils)
-    - If installing using brew on MacOS add the gnubin to PATH after installation
-        ```bash
-        # change to .bashrc if using bash
-        echo 'export PATH="$HOMEBREW_PREFIX/opt/coreutils/libexec/gnubin:$PATH"' >> ~/.zshrc
-        ```
 - [vault](https://developer.hashicorp.com/vault/install?product_intent=vault)
 - [tailscale](https://tailscale.com/download)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
+- [bash](https://www.gnu.org/software/bash/)
 
 Optional:
 - [fzf](https://github.com/junegunn/fzf) - Fuzzy finder
@@ -21,10 +17,24 @@ Optional:
 - [tmux](https://github.com/tmux/tmux/wiki) - terminal miultiplexer
 
 ## Installation
+
+> If you are using homebrew on MacOS, you will need to use coreutils by default for certificate validation
+> Here is a command to install and set all the requirements on MacOS:
+```bash
+brew install coreutils vault fzf fd ripgrep tmux kubectl tailscale bash
+echo 'export path="$homebrew_prefix/opt/coreutils/libexec/gnubin:$path"' >> ~/.zshrc
+```
+
 Clone the repository:
 ```bash
 git clone https://github.com/greeneyetechnology/greenix ~/greenix
 ```
+
+Generate a certificate for the first time:
+```bash
+~/greenix/scritps/validate-certificate.sh
+```
+
 Add the `bin` directory in the repo to your PATH:
 ```bash
 # change to .bashrc if using bash
@@ -32,42 +42,52 @@ echo 'export PATH="$HOME/greenix/bin:$PATH"' >> ~/.zshrc
 source ~/.zshrc
 ```
 
+Make sure your tailscale is connected to greeneye's tailnet, if not, login:
+```bash
+tailscale login
+```
+
 ## Usage
 gssh
 ```
 $ gssh --help
-Usage: gssh [OPTIONS] [PATTERN]
-
 SSH into a Greeneye device using Tailscale.
 
+Usage: gssh [OPTIONS] [PATTERN]
+
 Options:
-  -h, --help                    Show this help message and exit
-  --ignore-certificate          Skip certificate validation
-  -i, --identity-path PATH      Path to SSH identity file (default: ~/.ssh/greeneye_id_ed25519)
-  -u, --user USER               SSH user (default: yarok)
-  -e, --ssh-extra-args ARGS     Additional SSH arguments (default: -Y -A)
+    -h, --help                      Show this help message and exit
+    -i, --identity-path PATH        Path to SSH identity file (default: ~/.ssh/greeneye_id_ed25519)
+    -u, --user USER                 SSH user (default: yarok)
+    -e, --ssh-extra-args ARGS       Additional SSH arguments (default: -Y -A)
+    --update                        Update fleet repository (default: 'rt-versions')
+                                    and Greeneye's SSH config file (default: '~/.ssh/greeneye_config')
+    --ignore-certificate            Skip certificate validation
+    --debug                         Run with debug information
 
 Arguments:
-  PATTERN                       Optional pattern to filter device selection
+    PATTERN                         Optional pattern to filter device selection
 
 Examples:
-  gssh                          # Select from all available devices
-  gssh robot                    # Filter devices containing 'robot'
-  gssh -u admin robot           # Connect as 'admin' user to device containing 'robot'
+    gssh                            # Select from all available devices
+    gssh robot                      # Filter devices containing 'robot'
+    gssh -u admin robot             # Connect as 'admin' user to device containing 'robot'
 ```
 
 gkx
 ```
 $ gkx --help
-Usage: gkx [options] [pattern]
-
 A tool to quickly switch between kubeconfig contexts using tailscale
 
+Usage: gkx [OPTIONS] [PATTERN]
+
 Options:
-  -h, --help    Show this help message and exit
+    -h, --help      Show this help message and exit
+    --update        Update fleet repository (default: 'rt-versions')
+    --debug         run with debug information
 
 Arguments:
-  pattern       Optional pattern to filter available contexts
+    PATTERN         Optional pattern to filter output
 ```
 
 ## Troubleshoot - MacOS
@@ -121,6 +141,7 @@ And the `greeneye.nix` module for the requirements:
     coreutils
     vault
     tmux
+    bash
   ];
   home.file = {
     # Copy the files into ~/.local/bin/greeneye
