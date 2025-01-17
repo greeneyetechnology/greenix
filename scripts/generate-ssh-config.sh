@@ -75,6 +75,7 @@ Host $host
     User $SSH_USER
     HostName $mac
     IdentityFile $SSH_IDENTITY_FILE
+    ForwardAgent yes
     CertificateFile $SSH_CERTIFICATE_FILE
     ProxyCommand bash -c "$SCRIPT_DIR/validate-certificate.sh && exec nc %h %p"
 EOF
